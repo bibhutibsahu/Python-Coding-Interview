@@ -1,7 +1,0 @@
-# Runtime libraries used by the scripts and notebooks (pinned for reproducible builds).
-# Dependabot opens PRs to bump these.
-pandas==2.3.3
-numpy==2.0.2
-duckdb==1.4.5
-matplotlib==3.9.4
-seaborn==0.13.2

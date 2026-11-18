@@ -1,9 +1,0 @@
-# Everything needed to develop locally and run CI.
--r requirements.txt
-ipykernel==6.31.0
-ruff==0.17.5
-pytest==8.4.2
-nbmake==1.5.5
-nbformat==5.10.4
-nbconvert==7.16.6
-pre-commit==4.3.0

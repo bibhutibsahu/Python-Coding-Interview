@@ -32,8 +32,8 @@ credentials*.json
 Thumbs.db
 .idea/
 .vscode/*
-!.vscode/extensions.json
 !.vscode/settings.json
 
-# --- Generated docs ---
-docs/*.html
+
+# --- Local docs (not tracked) ---
+docs/

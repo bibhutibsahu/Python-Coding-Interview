@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # allow manual runs from the Actions tab
+  workflow_call: # let the release workflow reuse this pipeline
+
+# Cancel an in-progress run when a newer commit is pushed to the same branch/PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read # least privilege: CI only needs to read the code
+
+jobs:
+  lint:
+    name: Lint & format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install ruff==0.17.5
+      - name: Ruff lint
+        run: ruff check --output-format=github .
+      - name: Ruff format check
+        run: ruff format --check .
+
+  validate-notebooks:
+    name: Validate notebooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install nbformat==5.10.4
+      - run: python scripts/validate_notebooks.py
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    needs: [lint, validate-notebooks] # fail fast: don't spend minutes testing broken code
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Unit tests
+        run: pytest
+      - name: Smoke-run scripts
+        run: python pareto.py
+      - name: Execute curated notebooks
+        env:
+          MPLBACKEND: Agg # headless matplotlib
+        run: |
+          grep -vE '^\s*(#|$)' ci/notebooks-to-execute.txt | tr '\n' '\0' \
+            | xargs -0 pytest --nbmake --nbmake-timeout=300 -p no:cacheprovider

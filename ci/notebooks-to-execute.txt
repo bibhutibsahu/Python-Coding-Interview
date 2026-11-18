@@ -1,0 +1,8 @@
+# Notebooks CI executes top-to-bottom on every push/PR (one path per line).
+# Only add a notebook here once it runs cleanly from a fresh kernel:
+#   no Google Drive / Colab-only paths, no input(), all imports in requirements.txt.
+Assignment_Summarizing_Data.ipynb
+Kailedofin_tech_round.ipynb
+Numpy.ipynb
+Python_Practice.ipynb
+python_test_answers.ipynb

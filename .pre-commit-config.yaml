@@ -1,0 +1,32 @@
+# Runs the same checks as CI on your machine before every commit.
+# Setup once:  make setup   (or: pre-commit install)
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: ["--maxkb=10000"]
+      - id: detect-private-key
+      - id: end-of-file-fixer
+        exclude: \.ipynb$
+      - id: trailing-whitespace
+        exclude: \.ipynb$
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.5
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: validate-notebooks
+        name: validate notebooks
+        entry: python scripts/validate_notebooks.py
+        language: python
+        additional_dependencies: [nbformat==5.10.4]
+        files: \.ipynb$
